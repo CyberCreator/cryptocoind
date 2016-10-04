@@ -25,8 +25,8 @@ import random
 import socket
 import threading
 
-class DNSSeeder(object):
 
+class DNSSeeder(object):
     def __init__(self, dns_seeds):
         self._dns_seeds = dns_seeds
         self._lock = threading.Lock()
@@ -49,25 +49,25 @@ class DNSSeeder(object):
                 (ip_address, port) = address
 
                 index = 0
-                for info in socket.getaddrinfo(ip_address, port, socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP):
+                for info in socket.getaddrinfo(ip_address, port, socket.AF_INET, socket.SOCK_STREAM,
+                                               socket.IPPROTO_TCP):
                     try:
                         with self._lock:
                             self._found.append((info[4][0], info[4][1]))
                     except Exception as e:
                         pass
 
-                    # snooze for some time, so each dns_seed has a chance
-                    # to add nodes, and get addresses from those nodes
-                    #snooze = -1 + 1.3 ** index
-                    #if snooze > 600: snooze = 600 + random.randint(0, 120)
-                    #index += 1
-                    #time.sleep(snooze)
+                        # snooze for some time, so each dns_seed has a chance
+                        # to add nodes, and get addresses from those nodes
+                        # snooze = -1 + 1.3 ** index
+                        # if snooze > 600: snooze = 600 + random.randint(0, 120)
+                        # index += 1
+                        # time.sleep(snooze)
 
             except Exception as e:
                 pass
 
         for address in self._dns_seeds:
-            thread = threading.Thread(target = try_address, args = (address, ))
+            thread = threading.Thread(target=try_address, args=(address,))
             thread.daemon = True
             thread.start()
-

@@ -73,7 +73,7 @@ class MessageFormatException(Exception): pass
 
 
 class Message(format.CompoundType):
-    '''A message object. This base class is responsible for serializing and
+    """A message object. This base class is responsible for serializing and
        deserializing binary network payloads.
 
        Each message sub-class should specify an array of (name, FormatType)
@@ -83,7 +83,7 @@ class Message(format.CompoundType):
        do_not_register = True.
 
        Messages are rigorously type checked for the properties that are given
-       to ensure the bytes over the wire will be what was expected.'''
+       to ensure the bytes over the wire will be what was expected."""
 
     command = None
 
@@ -96,7 +96,7 @@ class Message(format.CompoundType):
     magic = property(lambda s: s._magic)
 
     def binary(self, magic):
-        'Returns the binary representation of the message.'
+        """Returns the binary representation of the message."""
 
         payload = format.CompoundType.binary(self)
 
@@ -108,27 +108,24 @@ class Message(format.CompoundType):
         # header + payload
         return magic + command + struct.pack('<I', len(payload)) + checksum + payload
 
-
     MessageTypes = dict()
 
     @staticmethod
     def register(message_type):
-        'Register a new message type.'
+        """Register a new message type."""
 
         Message.MessageTypes[message_type.command] = message_type
 
-
     @staticmethod
     def first_message_length(data):
-        '''Returns the length of the first message with beginning bytes of
-           data, or None if the length cannot be determined (yet).'''
+        """Returns the length of the first message with beginning bytes of
+           data, or None if the length cannot be determined (yet)."""
 
         # not enough to even determine payload size
         if len(data) < 20:
             return None
 
         return struct.unpack('<I', data[16:20])[0] + 24
-
 
     @classmethod
     def parse(cls, data, magic):
@@ -138,7 +135,7 @@ class Message(format.CompoundType):
             raise MessageFormatException('bad magic number')
 
         # get binary payload
-        (length, ) = struct.unpack('<I', data[16:20])
+        (length,) = struct.unpack('<I', data[16:20])
         payload = data[24:24 + length]
 
         # check the checksum
@@ -159,19 +156,17 @@ class Message(format.CompoundType):
 
         return message
 
-
     @property
     def name(self):
-        '''Should be overridden in sub-classes whose name differs from its
+        """Should be overridden in sub-classes whose name differs from its
         command. For example, the "addr" command's name is "address".
 
-        The name determines which command_* will be called on a node.'''
+        The name determines which command_* will be called on a node."""
 
         return self.command
 
-
     def _debug(self):
-         return _debug(self, [])
+        return _debug(self, [])
 
 
 class Version(Message):
@@ -180,7 +175,7 @@ class Version(Message):
     properties = [
         ('version', format.FormatTypeNumber('i')),
         ('services', format.FormatTypeNumber('Q')),
-        ('timestamp', format.FormatTypeNumber('q', allow_float = True)),
+        ('timestamp', format.FormatTypeNumber('q', allow_float=True)),
         ('addr_recv', format.FormatTypeNetworkAddressWithoutTimestamp()),
         ('addr_from', format.FormatTypeNetworkAddressWithoutTimestamp()),
         ('nonce', format.FormatTypeBytes(8)),
@@ -190,12 +185,13 @@ class Version(Message):
     ]
 
     def _debug(self):
-        return _debug(self,[
+        return _debug(self, [
             ('v', self.version),
             ('s', self.services),
             ('ua', self.user_agent),
             ('sh', self.start_height),
         ])
+
 
 class VersionAck(Message):
     command = 'verack'
@@ -207,12 +203,11 @@ class Address(Message):
     name = "address"
 
     properties = [
-        ('addr_list', format.FormatTypeArray(format.FormatTypeNetworkAddress(), max_length = 1000)),
+        ('addr_list', format.FormatTypeArray(format.FormatTypeNetworkAddress(), max_length=1000)),
     ]
 
     def _debug(self):
         return _debug(self, [('a', self.addr_list)])
-
 
 
 class Inventory(Message):
@@ -220,7 +215,7 @@ class Inventory(Message):
     name = "inventory"
 
     properties = [
-        ('inventory', format.FormatTypeArray(format.FormatTypeInventoryVector(), max_length = 50000)),
+        ('inventory', format.FormatTypeArray(format.FormatTypeInventoryVector(), max_length=50000)),
     ]
 
     def _debug(self):
@@ -270,6 +265,7 @@ class Transaction(Message):
     def _debug(self):
         return _debug(self, [('in', self.tx_in), ('out', self.tx_out)])
 
+
 class Block(Message):
     command = "block"
 
@@ -277,7 +273,7 @@ class Block(Message):
         ('version', format.FormatTypeNumber('I')),
         ('prev_block', format.FormatTypeBytes(32)),
         ('merkle_root', format.FormatTypeBytes(32)),
-        ('timestamp', format.FormatTypeNumber('I', allow_float = True)),
+        ('timestamp', format.FormatTypeNumber('I', allow_float=True)),
         ('bits', format.FormatTypeNumber('I')),
         ('nonce', format.FormatTypeNumber('I')),
         ('txns', format.FormatTypeArray(format.FormatTypeTxn())),
@@ -298,11 +294,12 @@ class Block(Message):
                                            self.nonce)
         return _debug(self, [('h', block_hash.encode('hex')), ('t', self.txns)])
 
+
 class Headers(Message):
     command = "headers"
 
     properties = [
-      ('headers', format.FormatTypeArray(format.FormatTypeBlockHeader())),
+        ('headers', format.FormatTypeArray(format.FormatTypeBlockHeader())),
     ]
 
     def _debug(self):
@@ -323,7 +320,7 @@ class Ping(Message):
     command = 'ping'
 
     properties = [
-      ('nonce', format.FormatTypeBytes(8)),
+        ('nonce', format.FormatTypeBytes(8)),
     ]
 
     def _debug(self):
@@ -338,13 +335,14 @@ class Reject(Message):
     command = "reject"
 
     properties = [
-      ('message', format.FormatTypeVarString()),
-      ('ccode', format.FormatTypeNumber('B')),
-      ('reason', format.FormatTypeVarString()),
+        ('message', format.FormatTypeVarString()),
+        ('ccode', format.FormatTypeNumber('B')),
+        ('reason', format.FormatTypeVarString()),
     ]
 
     def _debug(self):
         return _debug(self, [('m', self.message), ('r', self.reason)])
+
 
 class FilterLoad(Message):
     command = "filterload"
@@ -388,7 +386,7 @@ class MerkleBlock(Message):
         ('version', format.FormatTypeNumber('I')),
         ('prev_block', format.FormatTypeBytes(32)),
         ('merkle_root', format.FormatTypeBytes(32)),
-        ('timestamp', format.FormatTypeNumber('I', allow_float = True)),
+        ('timestamp', format.FormatTypeNumber('I', allow_float=True)),
         ('bits', format.FormatTypeNumber('I')),
         ('nonce', format.FormatTypeNumber('I')),
         ('total_transactions', format.FormatTypeNumber('I')),
@@ -466,7 +464,7 @@ class Alert(Message):
             offset += vl
 
             # extract priority
-            (p, ) = struct.unpack('<i', data[offset:offset + 4])
+            (p,) = struct.unpack('<i', data[offset:offset + 4])
             self._data['priority'] = p
             offset += 4
 
@@ -492,8 +490,10 @@ class Alert(Message):
         return util.ecc.verify(self.payload, public_key, self.signature)
 
     def __str__(self):
-        return '<message.Alert version=%d relay_until=%d expiration=%d id=%d cancel=%d cancel_set=[%s] min_ver=%d maxver=%d set_sub_ver=[%s] priority=%s comment=%r status_bar=%r reserverd=%r>' % (self.version, self.relay_until, self.expiration, self.id, self.cancel, ", ".join(str(i) for i in self.set_cancel), self.min_ver, self.max_ver, ", ".join(self.set_sub_ver), self.priority, self.comment, self.status_bar, self.reserved)
-
+        return '<message.Alert version=%d relay_until=%d expiration=%d id=%d cancel=%d cancel_set=[%s] min_ver=%d maxver=%d set_sub_ver=[%s] priority=%s comment=%r status_bar=%r reserverd=%r>' % (
+        self.version, self.relay_until, self.expiration, self.id, self.cancel,
+        ", ".join(str(i) for i in self.set_cancel), self.min_ver, self.max_ver, ", ".join(self.set_sub_ver),
+        self.priority, self.comment, self.status_bar, self.reserved)
 
     def _debug(self):
         return _debug(self, [('s', self.status_bar)])
