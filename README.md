@@ -34,6 +34,7 @@ To Do (coming soon...)
 
 There are lots of things left to do. Expect the API to change frequently for now. Also, as each altcoin has slightly different and random "things" changed from the reference implementation, which means more functions will be added to the individual `pycoind.coin` classes to accomodate a wider selection of altcoins.
 
+* Python 3 support (In Process)
 * Full wallet API with Deterministic BIP32
 * Wallet UI
 * Checkpoints
@@ -45,7 +46,6 @@ There are lots of things left to do. Expect the API to change frequently for now
 * Lots more coins (namecoin is highest on the list)
 * X11 based coins
 * Adaptive-N scrypt coins
-* Python 3 support
 * UI for sending transactions
 * ipv6 has been "implemented" but is untested... I need to set up a ipv6 network to test on.
 * more test cases (integrate all bitcoind test cases too)
