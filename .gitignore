@@ -1,4 +1,6 @@
 *.pyc
+*.py.bak
+*.xml
 .DS_Store
 .hg/*
 .hgignore

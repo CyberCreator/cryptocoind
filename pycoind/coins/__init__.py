@@ -21,17 +21,17 @@
 # THE SOFTWARE.
 
 
-from bitcoin import Bitcoin
-from coinyecoin import Coinyecoin
-from dogecoin import Dogecoin
-from feathercoin import Feathercoin
-from flappycoin import Flappycoin
-from litecoin import Litecoin
-from mooncoin import Mooncoin
-from potcoin import Potcoin
-from zetacoin import Zetacoin
+from .bitcoin import Bitcoin
+from .coinyecoin import Coinyecoin
+from .dogecoin import Dogecoin
+from .feathercoin import Feathercoin
+from .flappycoin import Flappycoin
+from .litecoin import Litecoin
+from .mooncoin import Mooncoin
+from .potcoin import Potcoin
+from .zetacoin import Zetacoin
 
-from coin import satoshi_per_coin
+from .coin import satoshi_per_coin
 
 __all__ = [
     'Bitcoin', 'Coinyecoin', 'Dogecoin', 'Feathercoin', 'Flappycoin',

@@ -25,15 +25,16 @@ import struct
 
 from .. import util
 
+
 def parse_variable_set(data, kind):
-    '''Reads a set of Parsable objects prefixed with a VarInteger.
+    """Reads a set of Parsable objects prefixed with a VarInteger.
 
        Any object can be used that supports parse(data), which returns
-       a tuple of (bytes_consumed, value).'''
+       a tuple of (bytes_consumed, value)."""
 
     (offset, count) = FormatTypeVarInteger.parse(data)
 
-    result = [ ]
+    result = []
     index = 0
 
     while index < count:
@@ -46,7 +47,7 @@ def parse_variable_set(data, kind):
 
 
 class ParameterException(Exception):
-    def __init__(self, name, value, kind = None):
+    def __init__(self, name, value, kind=None):
         if kind is None: kind = type(value)
         Exception.__init__(self, "Bad Parameter: %s = %r (%s)" % (name, value, kind))
         self._name = name
@@ -61,13 +62,14 @@ class ParameterException(Exception):
 # This metaclass will convert all the (name, kind) pairs in properties into
 # class properties and if the base class has a register(cls) method, call it.
 class _AutoPopulateAndRegister(type):
-
     def __init__(cls, name, bases, dct):
         super(_AutoPopulateAndRegister, cls).__init__(name, bases, dct)
 
         for (key, vt) in cls.properties:
             def get_parameter(k):
-                return property(lambda s: s._properties[k])
+                return property(lambda s:
+                                s._properties[k])
+
             setattr(cls, key, get_parameter(key))
 
         cls._name = name
@@ -78,17 +80,18 @@ class _AutoPopulateAndRegister(type):
                     base.register(cls)
                 break
 
-#import time
-#profile = dict(count = 0)
 
-class CompoundType(object):
+# import time
+# profile = dict(count = 0)
+
+class CompoundType(object, metaclass=_AutoPopulateAndRegister):
     properties = []
 
     def __init__(self, *args, **kw):
         keys = [k for (k, t) in self.properties]
 
         # convert the positional arguments into keywords
-        params = dict(zip(keys, args))
+        params = dict(list(zip(keys, args)))
 
         # did we specify a parameter both positionally and as a keyword?
         for k in kw:
@@ -114,22 +117,18 @@ class CompoundType(object):
         for (key, vt) in self.properties:
             value = vt.validate(params[key])
             if value is None:
-                 raise ParameterException(key, params[key])
+                raise ParameterException(key, params[key])
             params[key] = value
 
         self._properties = params
 
-
-    __metaclass__ = _AutoPopulateAndRegister
-
     def binary(self):
-        'Returns the binary representation of the message.'
+        """Returns the binary representation of the message."""
         return "".join(vt.binary(self._properties[key]) for (key, vt) in self.properties)
-
 
     @classmethod
     def parse(cls, data):
-        #t0 = time.time()
+        # t0 = time.time()
 
         kw = dict()
         offset = 0
@@ -137,15 +136,15 @@ class CompoundType(object):
             try:
                 (length, kw[key]) = vt.parse(data[offset:])
                 offset += length
-            except Exception, e:
+            except Exception as e:
                 raise ParameterException(key, data[offset:], vt)
 
-        #dt = time.time() - t0
-        #if cls not in profile: profile[cls] = [0.0, 0]
-        #profile[cls][0] += dt
-        #profile[cls][1] += 1
-        #profile['count'] += 1
-        #if profile['count'] % 100000 == 0:
+        # dt = time.time() - t0
+        # if cls not in profile: profile[cls] = [0.0, 0]
+        # profile[cls][0] += dt
+        # profile[cls][1] += 1
+        # profile['count'] += 1
+        # if profile['count'] % 100000 == 0:
         #    print "PROFILE"
         #    for key in profile:
         #        if key == 'count': continue
@@ -155,8 +154,7 @@ class CompoundType(object):
         # create without __init__ (would unnecessarily verify the parameters)
         self = cls.__new__(cls)
         self._properties = kw
-        return (offset, self)
-
+        return offset, self
 
     def __str__(self):
         output = [self._name]
@@ -167,21 +165,20 @@ class CompoundType(object):
 
 
 class FormatType(object):
-
     def validate(self, obj):
-        '''Returns the object to store if obj is valid for this type, otherwise
-           None. The type returned should be immutable.'''
+        """Returns the object to store if obj is valid for this type, otherwise
+           None. The type returned should be immutable."""
 
         raise NotImplemented()
 
     def binary(self, obj):
-        'Returns the binary form for this type.'
+        """Returns the binary form for this type."""
 
         raise NotImplemented()
 
     def parse(self, data):
-        '''Returns a (length, value) tuple where length is the amount of
-         data that was consumed.'''
+        """Returns a (length, value) tuple where length is the amount of
+         data that was consumed."""
 
         raise NotImplemented()
 
@@ -225,8 +222,8 @@ class FormatTypeOptional(FormatType):
             value = self._child.validate(obj)
             if value is not None:
                 return value
-        except Exception, e:
-            print e
+        except Exception as e:
+            print(e)
 
         return self._default
 
@@ -236,7 +233,7 @@ class FormatTypeOptional(FormatType):
     def parse(self, data):
         try:
             return self._child.parse(data)
-        except Exception, e:
+        except Exception as e:
             pass
         return (0, self._default)
 
@@ -246,10 +243,11 @@ class FormatTypeOptional(FormatType):
     def str(self, obj):
         return self._child.str(obj)
 
+
 # Simple formats (don't use any CompoundTypes nor FormatTypes)
 
 class FormatTypeNumber(FormatType):
-    '''Number format.
+    """Number format.
 
        Allows the object type to be the expected_type (default: int) using
        the endian and format to pack the value (default: little endian, signed
@@ -260,24 +258,23 @@ class FormatTypeNumber(FormatType):
        Possible Formats:
            b, B - signed, unsigned 1-byte char
            i, I - signed, unsigned 4-byte integer
-           q, Q - signed, unsigned 8-byte integer'''
+           q, Q - signed, unsigned 8-byte integer"""
 
-
-    def __init__(self, format = 'i', big_endian = False, allow_float = False):
+    def __init__(self, format='i', big_endian=False, allow_float=False):
         if format not in self._ranges:
             raise ValueError('invalid format type: %s' % format)
         self._format = {True: '>', False: '<'}[big_endian] + format
         self._allow_float = allow_float
 
     _ranges = dict(
-        b = (-128, 128),
-        B = (0, 256),
-        h = (-32768, 32768),
-        H = (0, 65536),
-        i = (-2147483648, 2147483648),
-        I = (0, 4294967296),
-        q = (-9223372036854775808L, 9223372036854775808L),
-        Q = (0, 18446744073709551616L)
+        b=(-128, 128),
+        B=(0, 256),
+        h=(-32768, 32768),
+        H=(0, 65536),
+        i=(-2147483648, 2147483648),
+        I=(0, 4294967296),
+        q=(-9223372036854775808, 9223372036854775808),
+        Q=(0, 18446744073709551616)
     )
 
     def validate(self, obj):
@@ -285,7 +282,7 @@ class FormatTypeNumber(FormatType):
         # check type
         if not (self._allow_float and isinstance(obj, float)):
             if self._format[1] in 'qQ':
-                if not isinstance(obj, (int, long)):
+                if not isinstance(obj, int):
                     return None
             elif not isinstance(obj, int):
                 return None
@@ -301,7 +298,7 @@ class FormatTypeNumber(FormatType):
         return struct.pack(self._format, int(obj))
 
     def parse(self, data):
-        length = dict(b = 1, h = 2, i = 4, q = 8)[self._format.lower()[-1]]
+        length = dict(b=1, h=2, i=4, q=8)[self._format.lower()[-1]]
         return (length, struct.unpack(self._format, data[:length])[0])
 
     def __str__(self):
@@ -309,7 +306,6 @@ class FormatTypeNumber(FormatType):
 
 
 class FormatTypeVarInteger(FormatType):
-
     @staticmethod
     def validate(obj):
         if isinstance(obj, int):
@@ -343,14 +339,13 @@ class FormatTypeVarInteger(FormatType):
 
 # @TODO: test ipv6...
 class FormatTypeIPAddress(FormatType):
-
     @staticmethod
     def _ipv4_groups(obj):
 
         # convert each group to its value
         try:
-            groups = map(int, obj.split('.'))
-        except ValueError, e:
+            groups = list(map(int, obj.split('.')))
+        except ValueError as e:
             return None
 
         # too many or not enough groups
@@ -373,10 +368,10 @@ class FormatTypeIPAddress(FormatType):
             return None
 
         # calculate each group's value
-        groups = [ ]
+        groups = []
         for group in objs:
             if group == '':
-                groups.extend([ 0 ] * (8 - len(objs)))
+                groups.extend([0] * (8 - len(objs)))
             else:
                 groups.append(int(group, 16))
 
@@ -410,7 +405,7 @@ class FormatTypeIPAddress(FormatType):
 
         groups = self._ipv4_groups(obj)
         if groups is not None:
-            return (chr(0) * 10) + (chr(255) * 2) + struct.pack('>BBBB', * groups)
+            return (chr(0) * 10) + (chr(255) * 2) + struct.pack('>BBBB', *groups)
 
         groups = self._ipv6_groups(obj)
         if groups is not None:
@@ -420,10 +415,9 @@ class FormatTypeIPAddress(FormatType):
 
 
 class FormatTypeBytes(FormatType):
-    '''String format.
+    """String format.
 
-       Allows the object to be a fixed length string.'''
-
+       Allows the object to be a fixed length string."""
 
     def __init__(self, length):
         self._length = length
@@ -447,9 +441,9 @@ class FormatTypeBytes(FormatType):
 
 
 class FormatTypeVarString(FormatType):
-    '''VarString format.
+    """VarString format.
 
-       The parameter must be a string, but may have variable length.'''
+       The parameter must be a string, but may have variable length."""
 
     @staticmethod
     def validate(obj):
@@ -472,15 +466,15 @@ class FormatTypeVarString(FormatType):
 
 
 class FormatTypeArray(FormatType):
-    '''Array format.
+    """Array format.
 
        The properties must be an array of objects, each of child_type. If
        min_length is specified, the array must contain at least that many
        children.
 
-       A tuple is returned to ensure the structure is immutable.'''
+       A tuple is returned to ensure the structure is immutable."""
 
-    def __init__(self, child_type, min_length = None, max_length = None):
+    def __init__(self, child_type, min_length=None, max_length=None):
         self._child_type = child_type
         self._min_length = min_length
         self._max_length = max_length
@@ -516,7 +510,7 @@ class FormatTypeArray(FormatType):
         return '<FormatTypeArray child=%s length=[%s, %s]>' % (self._child_type, self._min_length, self._max_length)
 
 
-#class FormatTypeRemaining(FormatType):
+# class FormatTypeRemaining(FormatType):
 #    def validate(self, obj):
 #        if isinstance(obj, str):
 #            return obj
@@ -535,28 +529,27 @@ class FormatTypeArray(FormatType):
 # Network Address types and format
 
 class NetworkAddress(CompoundType):
-
     properties = [
-        ('timestamp', FormatTypeNumber('I', allow_float = True)),
+        ('timestamp', FormatTypeNumber('I', allow_float=True)),
         ('services', FormatTypeNumber('Q')),
         ('address', FormatTypeIPAddress()),
-        ('port', FormatTypeNumber('H', big_endian = True)),
+        ('port', FormatTypeNumber('H', big_endian=True)),
     ]
 
 
 class FormatTypeNetworkAddress(FormatTypeCompoundType):
-    '''NetowrkAddress format.
+    """NetowrkAddress format.
 
-       The properties must be a NetworkAddress.'''
+       The properties must be a NetworkAddress."""
 
     expected_type = NetworkAddress
 
 
 class FormatTypeNetworkAddressWithoutTimestamp(FormatTypeNetworkAddress):
-    '''NetowrkAddress format.
+    """NetowrkAddress format.
 
        The properties must be a NetworkAddress. The timestamp will be zero
-       when deserialized and will be ommitted when serialized'''
+       when deserialized and will be ommitted when serialized"""
 
     @classmethod
     def parse(cls, data):
@@ -577,9 +570,9 @@ class InventoryVector(CompoundType):
 
 
 class FormatTypeInventoryVector(FormatTypeCompoundType):
-    '''InventoryVector format.
+    """InventoryVector format.
 
-       The properties must be an InventoryVector.'''
+       The properties must be an InventoryVector."""
 
     expected_type = InventoryVector
 
@@ -598,7 +591,7 @@ class OutPoint(CompoundType):
     def __eq__(self, other):
         if not isinstance(other, OutPoint):
             return False
-        return (self.hash == other.hash) and (self.index == otehr.index)
+        return (self.hash == other.hash) and (self.index == other.index)
 
 
 class FormatTypeOutPoint(FormatTypeInventoryVector):
@@ -614,9 +607,9 @@ class TxnIn(CompoundType):
 
 
 class FormatTypeTxnIn(FormatTypeCompoundType):
-    '''TxnIn format.
+    """TxnIn format.
 
-       The properties must be a TxnIn.'''
+       The properties must be a TxnIn."""
 
     expected_type = TxnIn
 
@@ -629,9 +622,9 @@ class TxnOut(CompoundType):
 
 
 class FormatTypeTxnOut(FormatTypeCompoundType):
-    '''TxnOut format.
+    """TxnOut format.
 
-       The properties must be a TxnOut.'''
+       The properties must be a TxnOut."""
 
     expected_type = TxnOut
 
@@ -652,13 +645,11 @@ class Txn(CompoundType):
 
 
 class FormatTypeTxn(FormatTypeInventoryVector):
-    '''Txn format.
+    """Txn format.
 
-       The properties must be a Txn.'''
+       The properties must be a Txn."""
 
     expected_type = Txn
-
-
 
 
 # Block Header type and format
@@ -668,7 +659,7 @@ class BlockHeader(CompoundType):
         ('version', FormatTypeNumber('I')),
         ('prev_block', FormatTypeBytes(32)),
         ('merkle_root', FormatTypeBytes(32)),
-        ('timestamp', FormatTypeNumber('I', allow_float = True)),
+        ('timestamp', FormatTypeNumber('I', allow_float=True)),
         ('bits', FormatTypeNumber('I')),
         ('nonce', FormatTypeNumber('I')),
         ('txn_count', FormatTypeVarInteger()),
@@ -689,11 +680,8 @@ class BlockHeader(CompoundType):
 
 
 class FormatTypeBlockHeader(FormatTypeInventoryVector):
-    '''BlockHeader format.
+    """BlockHeader format.
 
-       The properties must be a BlockHeader.'''
+       The properties must be a BlockHeader."""
 
     expected_type = BlockHeader
-
-
-
