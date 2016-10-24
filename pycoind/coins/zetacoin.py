@@ -67,9 +67,9 @@ class Zetacoin(coin.Coin):
 
     # Genesis block (hashes are little endiand; ie. 0's should be at the end)
     # @TODO: create a utility function to generate new genesis blocks
-    genesis_block_hash = 'f4bff286c99d426dc375d17887bb5fdd5844aa02590191dae22baab7ca060000'.decode('hex')
-    genesis_merkle_root = 'f9799babc9dacf7d3593adae8a45230d054f479e3d6b65e9bc073d3e8c7b22d0'.decode('hex')
-    genesis_timestamp = 1375548986
+    genesis_block_hash = 'f4bff286c99d426dc375d17887bb5fdd5844aa02590191dae22baab7ca060000'
+    genesis_merkle_root = 'f9799babc9dacf7d3593adae8a45230d054f479e3d6b65e9bc073d3e8c7b22d0
+    genesis_timestamp = 13755489
     genesis_nonce = 2089928209
 
     # The magic number should be 4-bytes, such that it represents a
