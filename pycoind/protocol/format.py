@@ -84,7 +84,8 @@ class _AutoPopulateAndRegister(type):
 # import time
 # profile = dict(count = 0)
 
-class CompoundType(object, metaclass=_AutoPopulateAndRegister):
+# class CompoundType(metaclass=_AutoPopulateAndRegister):
+class CompoundType():
     properties = []
 
     def __init__(self, *args, **kw):

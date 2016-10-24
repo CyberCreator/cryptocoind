@@ -196,7 +196,7 @@ class BaseNode(asyncore.dispatcher, object):
         # if message.find('Traceback') == -1:
         #    message = message[:100]
 
-        print(message, file=self._log)
+        seld._log.write(message)
 
     # Relaying
     # @TODO: not implemented yet and won't be made available until

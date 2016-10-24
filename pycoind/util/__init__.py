@@ -28,7 +28,7 @@ import os
 import struct
 import time
 import threading
-import urllib.request, urllib.error, urllib.parse
+import urllib
 
 from . import base58
 from . import bootstrap
