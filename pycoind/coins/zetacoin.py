@@ -68,7 +68,7 @@ class Zetacoin(coin.Coin):
     # Genesis block (hashes are little endiand; ie. 0's should be at the end)
     # @TODO: create a utility function to generate new genesis blocks
     genesis_block_hash = 'f4bff286c99d426dc375d17887bb5fdd5844aa02590191dae22baab7ca060000'
-    genesis_merkle_root = 'f9799babc9dacf7d3593adae8a45230d054f479e3d6b65e9bc073d3e8c7b22d0
+    genesis_merkle_root = 'f9799babc9dacf7d3593adae8a45230d054f479e3d6b65e9bc073d3e8c7b22d0'
     genesis_timestamp = 13755489
     genesis_nonce = 2089928209
 
@@ -85,7 +85,7 @@ class Zetacoin(coin.Coin):
 
     # This public key will be used to verify alerts; you can use the
     # pycoind.wallet.Address to generate a public/private key pair
-    alert_public_key = '045337216002ca6a71d63edf062895417610a723d453e722bf4728996c58661cdac3d4dec5cecd449b9086e9602b35cc726a9e0163e1a4d40f521fbdaebb674658'.decode('hex')
+    alert_public_key = '045337216002ca6a71d63edf062895417610a723d453e722bf4728996c58661cdac3d4dec5cecd449b9086e9602b35cc726a9e0163e1a4d40f521fbdaebb674658'
 
 
     block_height_guess = [

@@ -24,8 +24,8 @@
 import inspect
 import struct
 
-from bytevector import ByteVector
-import opcodes
+from .bytevector import ByteVector
+from . import opcodes
 
 from .. import coins
 from ..protocol import TxnOut, TxnIn, Txn
