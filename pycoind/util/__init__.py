@@ -21,9 +21,7 @@
 # THE SOFTWARE.
 
 
-import hashlib
 import json
-import math
 import os
 import struct
 import time
@@ -36,7 +34,7 @@ from . import ecc
 from . import key
 from . import piecewise
 
-from .hash import sha1, sha256, sha256d, ripemd160, hash160
+from hash import sha1, sha256, sha256d, ripemd160, hash160
 
 __all__ = [
     'base58', 'ecc', 'key', 'piecewise',
