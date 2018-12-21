@@ -156,7 +156,7 @@ def fetch_url_json_path_int(url, path):
             for component in path.split('/'):
                 if isinstance(data, dict):
                     data = data[component]
-                elif ininstance(data, (list, tuple)):
+                elif isinstance(data, (list, tuple)):
                     data = data[int(component)]
                 else:
                     return None
