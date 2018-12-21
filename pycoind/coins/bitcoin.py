@@ -72,8 +72,8 @@ class Bitcoin(coin.Coin):
 
     block_height_guess = [
         ('blockchain.info', util.fetch_url_json_path_int('https://blockchain.info/latestblock', 'height')),
-        ('blockexplorer.com', util.fetch_url_int('https://blockexplorer.com/q/getblockcount')),
-        ('blockr.io', util.fetch_url_json_path_int('http://btc.blockr.io/api/v1/coin/info', 'data/last_block/nb')),
+        ('blockexplorer.com', util.fetch_url_json_path_int('https://blockexplorer.com/q/getblockcount', 'info/blocks')), # very very lot of error (504..bad host)
+        # ('blockr.io', util.fetch_url_json_path_int('http://btc.blockr.io/api/v1/coin/info', 'data/last_block/nb')),
         ('chain.so', util.fetch_url_json_path_int('https://chain.so/api/v2/get_info/BTC', 'data/blocks')),
     ]
 
