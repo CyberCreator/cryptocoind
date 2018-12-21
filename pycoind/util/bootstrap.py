@@ -28,6 +28,7 @@ import threading
 
 class DNSSeeder(object):
     def __init__(self, dns_seeds):
+        print("Run DNS Seeder.")
         self._dns_seeds = dns_seeds
         self._lock = threading.Lock()
         self._found = []
@@ -53,7 +54,10 @@ class DNSSeeder(object):
                                                socket.IPPROTO_TCP):
                     try:
                         with self._lock:
-                            self._found.append((info[4][0], info[4][1]))
+                            (ip_address_found, port_found) = info[4]
+                            if (ip_address_found, port_found) not in self._found:
+                                self._found.append((ip_address_found, port_found))
+                                # print(self._found, "\n", len(self._found), "\n")
                     except Exception as e:
                         pass
 
@@ -69,5 +73,5 @@ class DNSSeeder(object):
 
         for address in self._dns_seeds:
             thread = threading.Thread(target=try_address, args=(address,))
-            thread.daemon = True
+            thread.daemon = True # false? 
             thread.start()
